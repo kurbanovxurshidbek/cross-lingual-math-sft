@@ -1,0 +1,107 @@
+# ============================================================
+# Model
+# ============================================================
+
+base_model: meta-llama/Llama-3.2-3B-Instruct
+
+load_in_8bit: false
+load_in_4bit: false
+
+special_tokens:
+  pad_token: "<|finetune_right_pad_id|>"
+
+# ============================================================
+# Dataset
+# ============================================================
+
+chat_template: llama3
+eot_tokens:
+  - <|eot_id|>
+
+datasets:
+  - path: /workspace/train_chat.jsonl
+    ds_type: json
+    type: chat_template
+    field_messages: messages
+    message_property_mappings:
+      role: role
+      content: content
+    roles_to_train: ["assistant"]
+
+dataset_prepared_path: /workspace/preprocess_llama
+
+val_set_size: 0.01
+
+output_dir: /workspace/outputs/llama-3.2-3b
+
+# ============================================================
+# Dataloader
+# ============================================================
+
+dataloader_num_workers: 8
+
+# ============================================================
+# Sequence / Attention
+# ============================================================
+
+sequence_len: 1024
+
+sample_packing: true
+eval_sample_packing: false
+pad_to_sequence_len: true
+
+attn_implementation: flash_attention_2
+
+# ============================================================
+# Training
+# ============================================================
+
+micro_batch_size: 16
+gradient_accumulation_steps: 1
+num_epochs: 3
+
+optimizer: adamw_torch_fused
+lr_scheduler: cosine
+learning_rate: 2e-5
+warmup_ratio: 0.05
+weight_decay: 0.01
+
+# ============================================================
+# Precision
+# ============================================================
+
+bf16: true
+tf32: true
+
+# ============================================================
+# Memory Optimization
+# ============================================================
+
+gradient_checkpointing: true
+gradient_checkpointing_kwargs:
+  use_reentrant: false
+
+# ============================================================
+# Logging / Saving
+# ============================================================
+
+logging_steps: 1
+evals_per_epoch: 1
+saves_per_epoch: 1
+save_total_limit: 2
+
+# ============================================================
+# Weights & Biases
+# ============================================================
+
+wandb_project: cross-lingual-math-sft
+wandb_entity: infocuslabs
+wandb_watch: "false"
+wandb_name: llama-3.2-3b-gsm8k-sft
+wandb_log_model: "false"
+
+# ============================================================
+# Hugging Face Hub
+# ============================================================
+
+hub_model_id: kurbanovxurshidbek/llama-3.2-3b-gsm8k-sft

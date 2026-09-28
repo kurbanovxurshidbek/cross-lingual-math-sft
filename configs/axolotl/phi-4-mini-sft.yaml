@@ -1,0 +1,60 @@
+base_model: microsoft/Phi-4-mini-instruct
+
+load_in_8bit: false
+load_in_4bit: false
+
+datasets:
+  - path: /workspace/train_chat.jsonl
+    ds_type: json
+    type: chat_template
+    chat_template: tokenizer_default
+    field_messages: messages
+    message_property_mappings:
+      role: role
+      content: content
+    roles_to_train: ["assistant"]
+
+dataset_prepared_path: /workspace/preprocess
+val_set_size: 0.01
+
+output_dir: /workspace/outputs/phi-4-mini
+
+sequence_len: 1024
+sample_packing: true
+eval_sample_packing: false
+pad_to_sequence_len: true
+
+dataloader_num_workers: 8
+
+attn_implementation: flash_attention_2
+
+micro_batch_size: 4
+gradient_accumulation_steps: 4
+
+num_epochs: 3
+
+optimizer: adamw_torch_fused
+lr_scheduler: cosine
+learning_rate: 2e-5
+warmup_ratio: 0.05
+weight_decay: 0.01
+
+bf16: true
+tf32: true
+
+gradient_checkpointing: true
+gradient_checkpointing_kwargs:
+  use_reentrant: false
+
+logging_steps: 1
+evals_per_epoch: 1
+saves_per_epoch: 1
+save_total_limit: 2
+
+wandb_project: cross-lingual-math-sft
+wandb_entity: infocuslabs
+wandb_watch: "false"
+wandb_name: phi-4-mini-gsm8k-sft
+wandb_log_model: "false"
+
+hub_model_id: kurbanovxurshidbek/phi-4-mini-gsm8k-sft
